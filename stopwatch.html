@@ -1,115 +1,246 @@
-import { useState, useEffect } from 'react';
-import { Github } from 'lucide-react';
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>st.NASSIM - Chronomètre</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
 
-const Timer = () => {
-  const [time, setTime] = useState(0);
-  const [isRunning, setIsRunning] = useState(false);
-  const [laps, setLaps] = useState([]);
-  const [lastLapTime, setLastLapTime] = useState(0);
+        body {
+            min-height: 100vh;
+            background: white;
+            color: #111827;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+        }
 
-  useEffect(() => {
-    let intervalId;
-    if (isRunning) {
-      intervalId = setInterval(() => setTime(prev => prev + 1), 1000);
-    }
-    return () => clearInterval(intervalId);
-  }, [isRunning]);
+        .github-link {
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: background-color 0.3s;
+            cursor: pointer;
+            border: none;
+            background: none;
+        }
 
-  const formatNumber = (number) => {
-    return number.toString().padStart(2, '0');
-  };
+        .github-link:hover {
+            background-color: #f3f4f6;
+        }
 
-  const formatTime = (timeInSeconds) => {
-    const hours = Math.floor(timeInSeconds / 3600);
-    const minutes = Math.floor((timeInSeconds % 3600) / 60);
-    const seconds = timeInSeconds % 60;
-    return `${formatNumber(hours)}:${formatNumber(minutes)}:${formatNumber(seconds)}`;
-  };
+        .github-link svg {
+            width: 32px;
+            height: 32px;
+            transition: color 0.3s;
+        }
 
-  const handleStartStop = () => {
-    setIsRunning(!isRunning);
-  };
+        .github-link:hover svg {
+            color: #3b82f6;
+        }
 
-  const handleReset = () => {
-    setTime(0);
-    setIsRunning(false);
-    setLaps([]);
-    setLastLapTime(0);
-  };
+        .title {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 4rem;
+            background: linear-gradient(to right, #3b82f6, #8b5cf6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
 
-  const handleLap = () => {
-    if (isRunning) {
-      const lapTime = time - lastLapTime;
-      setLaps([{ total: time, lap: lapTime }, ...laps]);
-      setLastLapTime(time);
-    }
-  };
+        .timer {
+            font-size: 6rem;
+            font-weight: 300;
+            margin-bottom: 3rem;
+            letter-spacing: -0.05em;
+        }
 
-  const openGithub = () => {
-    window.open('https://github.com/stNASSIM', '_blank');
-  };
+        .buttons {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
 
-  return (
-    <div className="min-h-screen bg-white text-gray-900 flex flex-col items-center justify-start p-8 font-sans relative">
+        .btn {
+            padding: 1rem 2rem;
+            border-radius: 9999px;
+            font-size: 1.125rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
 
-      <button 
-        onClick={openGithub}
-        className="absolute top-8 right-8 p-2 rounded-full hover:bg-gray-100 transition-colors duration-300"
-      >
-        <Github size={32} className="text-gray-900 hover:text-blue-500 transition-colors duration-300" />
-      </button>
+        .btn-primary {
+            background: #111827;
+            color: white;
+            border: none;
+        }
 
-      <h1 className="text-5xl font-bold mb-16 bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
-        st.NASSIM
-      </h1>
-      
-      <div className="text-8xl font-light mb-12 tracking-tight">
-        {formatTime(time)}
-      </div>
-      
-      <div className="flex gap-4 mb-8">
-        <button
-          onClick={handleStartStop}
-          className="px-8 py-4 rounded-full bg-gray-900 text-white font-medium text-lg hover:bg-gray-800 transition-colors duration-300"
-        >
-          {isRunning ? 'Stop' : 'Start'}
-        </button>
-        
-        <button
-          onClick={handleLap}
-          className="px-8 py-4 rounded-full border-2 border-gray-900 text-gray-900 font-medium text-lg hover:bg-gray-100 transition-colors duration-300"
-          disabled={!isRunning}
-        >
-          Tour
-        </button>
-        
-        <button
-          onClick={handleReset}
-          className="px-8 py-4 rounded-full border-2 border-gray-900 text-gray-900 font-medium text-lg hover:bg-gray-100 transition-colors duration-300"
-        >
-          Reset
-        </button>
-      </div>
+        .btn-primary:hover {
+            background: #1f2937;
+        }
 
+        .btn-secondary {
+            background: white;
+            color: #111827;
+            border: 2px solid #111827;
+        }
 
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
-        <div className="bg-gray-50 py-3 px-6 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900">Historique des Tours</h2>
-        </div>
-        <div className="divide-y divide-gray-200 max-h-96 overflow-auto">
-          {laps.map((lap, index) => (
-            <div key={index} className="flex justify-between py-4 px-6 hover:bg-gray-50">
-              <span className="font-medium">Tour {laps.length - index}</span>
-              <div className="flex gap-8">
-                <span>Durée: {formatTime(lap.lap)}</span>
-                <span>Total: {formatTime(lap.total)}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+        .btn-secondary:hover {
+            background: #f3f4f6;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .laps-container {
+            width: 100%;
+            max-width: 28rem;
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
+            overflow: hidden;
+        }
+
+        .laps-header {
+            background: #f9fafb;
+            padding: 0.75rem 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .laps-header h2 {
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+
+        .laps-list {
+            max-height: 24rem;
+            overflow: auto;
+        }
+
+        .lap-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .lap-item:hover {
+            background: #f9fafb;
+        }
+
+        .lap-info {
+            display: flex;
+            gap: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <button class="github-link" onclick="window.open('https://github.com/stNASSIM', '_blank')">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+        </svg>
+    </button>
+
+    <h1 class="title">st.NASSIM</h1>
+    <div class="timer" id="timer">00:00:00</div>
+    
+    <div class="buttons">
+        <button class="btn btn-primary" id="startStop">Start</button>
+        <button class="btn btn-secondary" id="lap" disabled>Tour</button>
+        <button class="btn btn-secondary" id="reset">Reset</button>
     </div>
-  );
-};
 
-export default Timer;
+    <div class="laps-container">
+        <div class="laps-header">
+            <h2>Historique des Tours</h2>
+        </div>
+        <div class="laps-list" id="lapsList"></div>
+    </div>
+
+    <script>
+        let time = 0;
+        let isRunning = false;
+        let interval;
+        let lastLapTime = 0;
+        let laps = [];
+
+        const formatNumber = (number) => String(number).padStart(2, '0');
+
+        const formatTime = (timeInSeconds) => {
+            const hours = Math.floor(timeInSeconds / 3600);
+            const minutes = Math.floor((timeInSeconds % 3600) / 60);
+            const seconds = timeInSeconds % 60;
+            return `${formatNumber(hours)}:${formatNumber(minutes)}:${formatNumber(seconds)}`;
+        };
+
+        const updateDisplay = () => {
+            document.getElementById('timer').textContent = formatTime(time);
+        };
+
+        const toggleTimer = () => {
+            isRunning = !isRunning;
+            document.getElementById('startStop').textContent = isRunning ? 'Stop' : 'Start';
+            document.getElementById('lap').disabled = !isRunning;
+
+            if (isRunning) {
+                interval = setInterval(() => {
+                    time++;
+                    updateDisplay();
+                }, 1000);
+            } else {
+                clearInterval(interval);
+            }
+        };
+
+        const resetTimer = () => {
+            isRunning = false;
+            time = 0;
+            lastLapTime = 0;
+            laps = [];
+            clearInterval(interval);
+            updateDisplay();
+            document.getElementById('startStop').textContent = 'Start';
+            document.getElementById('lap').disabled = true;
+            document.getElementById('lapsList').innerHTML = '';
+        };
+
+        const addLap = () => {
+            if (!isRunning) return;
+            
+            const lapTime = time - lastLapTime;
+            laps.unshift({ total: time, lap: lapTime });
+            lastLapTime = time;
+            
+            const lapsHtml = laps.map((lap, index) => `
+                <div class="lap-item">
+                    <span>Tour ${laps.length - index}</span>
+                    <div class="lap-info">
+                        <span>Durée: ${formatTime(lap.lap)}</span>
+                        <span>Total: ${formatTime(lap.total)}</span>
+                    </div>
+                </div>
+            `).join('');
+            
+            document.getElementById('lapsList').innerHTML = lapsHtml;
+        };
+
+        document.getElementById('startStop').addEventListener('click', toggleTimer);
+        document.getElementById('lap').addEventListener('click', addLap);
+        document.getElementById('reset').addEventListener('click', resetTimer);
+    </script>
+</body>
+</html>
